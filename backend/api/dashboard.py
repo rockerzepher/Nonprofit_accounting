@@ -5,11 +5,12 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
+from backend._paths import TEMPLATES_DIR
 from backend.database import get_db
 from backend.models.organization import Organization
 
 router = APIRouter()
-templates = Jinja2Templates(directory="backend/templates")
+templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
 
 @router.get("/", response_class=HTMLResponse)

@@ -1,9 +1,13 @@
 """Database configuration and session management."""
 
+import os
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 
-DATABASE_URL = "sqlite:///./nonprofit_accounting.db"
+# On Vercel, /tmp is the only writable directory
+_db_dir = "/tmp" if os.environ.get("VERCEL") else "."
+DATABASE_URL = f"sqlite:///{_db_dir}/nonprofit_accounting.db"
 
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

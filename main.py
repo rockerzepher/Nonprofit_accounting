@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
+from backend._paths import STATIC_DIR
 from backend.database import init_db
 from backend.api.onboarding import router as onboarding_router
 from backend.api.transactions import router as transactions_router
@@ -21,7 +22,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Nonprofit Accounting", version="0.1.0", lifespan=lifespan)
 
 # Static files
-app.mount("/static", StaticFiles(directory="backend/static"), name="static")
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 # Routers
 app.include_router(dashboard_router)

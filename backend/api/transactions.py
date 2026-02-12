@@ -5,6 +5,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
+from backend._paths import TEMPLATES_DIR
 from backend.database import get_db
 from backend.models.accounting import Transaction, Account, Fund
 from backend.models.organization import Organization
@@ -12,7 +13,7 @@ from backend.services.csv_parser import parse_csv
 from backend.services.classifier import classify_transactions, confirm_classification
 
 router = APIRouter()
-templates = Jinja2Templates(directory="backend/templates")
+templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
 
 @router.get("/{org_id}", response_class=HTMLResponse)

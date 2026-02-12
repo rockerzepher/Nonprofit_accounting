@@ -7,6 +7,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
+from backend._paths import TEMPLATES_DIR
 from backend.database import get_db
 from backend.models.organization import Organization
 from backend.services.reports import (
@@ -14,7 +15,7 @@ from backend.services.reports import (
 )
 
 router = APIRouter()
-templates = Jinja2Templates(directory="backend/templates")
+templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
 
 def _default_period(org: Organization) -> tuple[date, date]:
