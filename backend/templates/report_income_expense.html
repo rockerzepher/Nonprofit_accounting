@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Income & Expense Report — {{ org.name }}{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Income & Expense Report</h1>
+    <p class="text-muted">{{ report.period_start.strftime('%B %d, %Y') }} — {{ report.period_end.strftime('%B %d, %Y') }}</p>
+</div>
+
+<form method="get" class="date-filter card">
+    <div class="card-body form-row">
+        <div class="form-group">
+            <label>From</label>
+            <input type="date" name="start" value="{{ start }}" class="form-control">
+        </div>
+        <div class="form-group">
+            <label>To</label>
+            <input type="date" name="end" value="{{ end }}" class="form-control">
+        </div>
+        <button type="submit" class="btn btn-primary">Update</button>
+    </div>
+</form>
+
+<div class="report-section">
+    <h2>Income</h2>
+    {% if report.income_lines %}
+    <table class="table report-table">
+        <thead>
+            <tr><th>Account</th><th class="text-right">Amount</th></tr>
+        </thead>
+        <tbody>
+            {% for line in report.income_lines %}
+            <tr>
+                <td>{{ line.code }} — {{ line.name }}</td>
+                <td class="text-right">${{ "%.2f" | format(line.amount) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr class="total-row">
+                <td><strong>Total Income</strong></td>
+                <td class="text-right"><strong>${{ "%.2f" | format(report.total_income) }}</strong></td>
+            </tr>
+        </tfoot>
+    </table>
+    {% else %}
+    <p class="text-muted">No income recorded in this period.</p>
+    {% endif %}
+</div>
+
+<div class="report-section">
+    <h2>Expenses</h2>
+    {% if report.expense_lines %}
+    <table class="table report-table">
+        <thead>
+            <tr><th>Account</th><th class="text-right">Amount</th></tr>
+        </thead>
+        <tbody>
+            {% for line in report.expense_lines %}
+            <tr>
+                <td>{{ line.code }} — {{ line.name }}</td>
+                <td class="text-right">${{ "%.2f" | format(line.amount) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr class="total-row">
+                <td><strong>Total Expenses</strong></td>
+                <td class="text-right"><strong>${{ "%.2f" | format(report.total_expenses) }}</strong></td>
+            </tr>
+        </tfoot>
+    </table>
+    {% else %}
+    <p class="text-muted">No expenses recorded in this period.</p>
+    {% endif %}
+</div>
+
+<div class="card summary-card">
+    <div class="card-body">
+        <h2>Net Income: <span class="{% if report.net_income >= 0 %}text-success{% else %}text-danger{% endif %}">${{ "%.2f" | format(report.net_income) }}</span></h2>
+    </div>
+</div>
+{% endblock %}

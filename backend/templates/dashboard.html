@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Your Organizations — Nonprofit Accounting{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Your Organizations</h1>
+    <a href="/onboarding/" class="btn btn-primary">+ New Organization</a>
+</div>
+
+{% if orgs %}
+<div class="card-grid">
+    {% for org in orgs %}
+    <a href="/dashboard/{{ org.id }}" class="card card-link">
+        <div class="card-body">
+            <h3>{{ org.name }}</h3>
+            <span class="badge">{{ org.org_type | replace("_", " ") | title }}</span>
+            {% if org.description %}
+            <p class="text-muted">{{ org.description }}</p>
+            {% endif %}
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <h2>Welcome!</h2>
+    <p>Get started by creating your first organization.</p>
+    <a href="/onboarding/" class="btn btn-primary">Create Organization</a>
+</div>
+{% endif %}
+{% endblock %}

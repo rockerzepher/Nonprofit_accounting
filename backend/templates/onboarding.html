@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Set Up Your Organization — Nonprofit Accounting{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Set Up Your Organization</h1>
+    <p class="text-muted">We'll create a chart of accounts tailored to your nonprofit type.</p>
+</div>
+
+<form method="post" action="/onboarding/" class="form card">
+    <div class="card-body">
+        <div class="form-group">
+            <label for="name">Organization Name</label>
+            <input type="text" id="name" name="name" required placeholder="e.g. Grace Community Church" class="form-control">
+        </div>
+
+        <div class="form-group">
+            <label for="org_type">Organization Type</label>
+            <select id="org_type" name="org_type" required class="form-control">
+                <option value="">Select a type…</option>
+                <option value="church">Church / House of Worship</option>
+                <option value="school">School / Educational</option>
+                <option value="community_group">Community Group</option>
+                <option value="general_nonprofit">General Nonprofit</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description (optional)</label>
+            <textarea id="description" name="description" rows="3" class="form-control" placeholder="Brief description of your organization…"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="fiscal_year_start">Fiscal Year Starts In</label>
+            <select id="fiscal_year_start" name="fiscal_year_start" class="form-control">
+                <option value="1" selected>January</option>
+                <option value="2">February</option>
+                <option value="3">March</option>
+                <option value="4">April</option>
+                <option value="5">May</option>
+                <option value="6">June</option>
+                <option value="7">July</option>
+                <option value="8">August</option>
+                <option value="9">September</option>
+                <option value="10">October</option>
+                <option value="11">November</option>
+                <option value="12">December</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">Create Organization</button>
+    </div>
+</form>
+{% endblock %}

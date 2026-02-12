@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Balance Sheet — {{ org.name }}{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Balance Sheet</h1>
+    <p class="text-muted">As of {{ report.as_of.strftime('%B %d, %Y') }}</p>
+</div>
+
+<form method="get" class="date-filter card">
+    <div class="card-body form-row">
+        <div class="form-group">
+            <label>As of</label>
+            <input type="date" name="as_of" value="{{ as_of }}" class="form-control">
+        </div>
+        <button type="submit" class="btn btn-primary">Update</button>
+    </div>
+</form>
+
+<div class="report-section">
+    <h2>Assets</h2>
+    {% if report.asset_lines %}
+    <table class="table report-table">
+        <tbody>
+            {% for line in report.asset_lines %}
+            <tr>
+                <td>{{ line.code }} — {{ line.name }}</td>
+                <td class="text-right">${{ "%.2f" | format(line.amount) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr class="total-row">
+                <td><strong>Total Assets</strong></td>
+                <td class="text-right"><strong>${{ "%.2f" | format(report.total_assets) }}</strong></td>
+            </tr>
+        </tfoot>
+    </table>
+    {% else %}
+    <p class="text-muted">No asset transactions recorded.</p>
+    {% endif %}
+</div>
+
+<div class="report-section">
+    <h2>Liabilities</h2>
+    {% if report.liability_lines %}
+    <table class="table report-table">
+        <tbody>
+            {% for line in report.liability_lines %}
+            <tr>
+                <td>{{ line.code }} — {{ line.name }}</td>
+                <td class="text-right">${{ "%.2f" | format(line.amount | abs) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr class="total-row">
+                <td><strong>Total Liabilities</strong></td>
+                <td class="text-right"><strong>${{ "%.2f" | format(report.total_liabilities) }}</strong></td>
+            </tr>
+        </tfoot>
+    </table>
+    {% else %}
+    <p class="text-muted">No liability transactions recorded.</p>
+    {% endif %}
+</div>
+
+<div class="report-section">
+    <h2>Net Assets (Equity)</h2>
+    {% if report.equity_lines %}
+    <table class="table report-table">
+        <tbody>
+            {% for line in report.equity_lines %}
+            <tr>
+                <td>{% if line.code %}{{ line.code }} — {% endif %}{{ line.name }}</td>
+                <td class="text-right">${{ "%.2f" | format(line.amount | abs) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr class="total-row">
+                <td><strong>Total Net Assets</strong></td>
+                <td class="text-right"><strong>${{ "%.2f" | format(report.total_equity) }}</strong></td>
+            </tr>
+        </tfoot>
+    </table>
+    {% else %}
+    <p class="text-muted">No equity transactions recorded.</p>
+    {% endif %}
+</div>
+{% endblock %}

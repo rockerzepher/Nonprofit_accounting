@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Fund Summary — {{ org.name }}{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Fund Summary</h1>
+    <p class="text-muted">{{ start }} — {{ end }}</p>
+</div>
+
+<form method="get" class="date-filter card">
+    <div class="card-body form-row">
+        <div class="form-group">
+            <label>From</label>
+            <input type="date" name="start" value="{{ start }}" class="form-control">
+        </div>
+        <div class="form-group">
+            <label>To</label>
+            <input type="date" name="end" value="{{ end }}" class="form-control">
+        </div>
+        <button type="submit" class="btn btn-primary">Update</button>
+    </div>
+</form>
+
+{% if funds %}
+<div class="table-wrapper">
+<table class="table report-table">
+    <thead>
+        <tr>
+            <th>Fund</th>
+            <th>Type</th>
+            <th class="text-right">Income</th>
+            <th class="text-right">Expenses</th>
+            <th class="text-right">Net</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for f in funds %}
+        <tr>
+            <td>{{ f.fund_name }}</td>
+            <td><span class="badge">{{ f.fund_type | replace("_", " ") | title }}</span></td>
+            <td class="text-right">${{ "%.2f" | format(f.total_income) }}</td>
+            <td class="text-right">${{ "%.2f" | format(f.total_expenses) }}</td>
+            <td class="text-right {% if f.net >= 0 %}text-success{% else %}text-danger{% endif %}">${{ "%.2f" | format(f.net) }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+{% else %}
+<div class="empty-state">
+    <p>No fund activity in this period. Transactions must be classified and assigned to a fund to appear here.</p>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}{{ org.name }} — Dashboard{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>{{ org.name }}</h1>
+    <span class="badge">{{ org.org_type | replace("_", " ") | title }}</span>
+</div>
+
+<div class="card-grid stats-grid">
+    <div class="card stat-card">
+        <div class="card-body">
+            <div class="stat-value">${{ "%.2f" | format(total_income) }}</div>
+            <div class="stat-label">Total Income</div>
+        </div>
+    </div>
+    <div class="card stat-card">
+        <div class="card-body">
+            <div class="stat-value">${{ "%.2f" | format(total_expenses) }}</div>
+            <div class="stat-label">Total Expenses</div>
+        </div>
+    </div>
+    <div class="card stat-card">
+        <div class="card-body">
+            <div class="stat-value {% if net >= 0 %}text-success{% else %}text-danger{% endif %}">${{ "%.2f" | format(net) }}</div>
+            <div class="stat-label">Net Income</div>
+        </div>
+    </div>
+    <div class="card stat-card">
+        <div class="card-body">
+            <div class="stat-value">{{ total_txns }}</div>
+            <div class="stat-label">Transactions</div>
+        </div>
+    </div>
+</div>
+
+<div class="card-grid">
+    <div class="card">
+        <div class="card-body">
+            <h3>Classification Status</h3>
+            {% if total_txns > 0 %}
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: {{ (classified / total_txns * 100) | int }}%"></div>
+            </div>
+            <p>{{ classified }} of {{ total_txns }} classified
+                {% if unclassified > 0 %}
+                — <a href="/transactions/{{ org.id }}?filter=unclassified">{{ unclassified }} need review</a>
+                {% endif %}
+            </p>
+            {% else %}
+            <p class="text-muted">No transactions yet. <a href="/transactions/{{ org.id }}/upload">Upload a bank statement</a> to get started.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <h3>Quick Actions</h3>
+            <div class="action-list">
+                <a href="/transactions/{{ org.id }}/upload" class="btn btn-primary">Upload Bank Statement</a>
+                <a href="/transactions/{{ org.id }}" class="btn btn-secondary">View Transactions</a>
+                <a href="/reports/{{ org.id }}" class="btn btn-secondary">View Reports</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

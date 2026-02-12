@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}Transactions — {{ org.name }}{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Transactions</h1>
+    <div class="header-actions">
+        <a href="/transactions/{{ org.id }}/upload" class="btn btn-primary">Upload CSV</a>
+        <form method="post" action="/transactions/{{ org.id }}/classify-all" style="display:inline">
+            <button type="submit" class="btn btn-secondary">Re-classify All</button>
+        </form>
+    </div>
+</div>
+
+{% if request.query_params.get('uploaded') %}
+<div class="alert alert-success">
+    Successfully imported {{ request.query_params.get('uploaded') }} transactions and auto-classified them.
+</div>
+{% endif %}
+
+<div class="filter-bar">
+    <a href="/transactions/{{ org.id }}?filter=all" class="btn btn-sm {% if current_filter == 'all' %}btn-primary{% else %}btn-outline{% endif %}">All ({{ transactions | length }})</a>
+    <a href="/transactions/{{ org.id }}?filter=unclassified" class="btn btn-sm {% if current_filter == 'unclassified' %}btn-primary{% else %}btn-outline{% endif %}">Unclassified</a>
+    <a href="/transactions/{{ org.id }}?filter=classified" class="btn btn-sm {% if current_filter == 'classified' %}btn-primary{% else %}btn-outline{% endif %}">Classified</a>
+</div>
+
+{% if transactions %}
+<div class="table-wrapper">
+<table class="table">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th class="text-right">Amount</th>
+            <th>Account</th>
+            <th>Fund</th>
+            <th>Confidence</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for txn in transactions %}
+        <tr class="{% if not txn.account_id %}row-unclassified{% endif %}">
+            <td>{{ txn.date.strftime('%m/%d/%Y') }}</td>
+            <td>{{ txn.description }}</td>
+            <td class="text-right {% if txn.amount >= 0 %}text-success{% else %}text-danger{% endif %}">
+                ${{ "%.2f" | format(txn.amount | abs) }}
+                {% if txn.amount >= 0 %}
+                <span class="badge badge-sm badge-success">IN</span>
+                {% else %}
+                <span class="badge badge-sm badge-danger">OUT</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if txn.account %}
+                {{ txn.account.code }} — {{ txn.account.name }}
+                {% else %}
+                <span class="text-muted">—</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if txn.fund %}
+                {{ txn.fund.name }}
+                {% else %}
+                <span class="text-muted">—</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if txn.ai_classified %}
+                <span class="confidence-bar">
+                    <span class="confidence-fill" style="width: {{ (txn.ai_confidence * 100) | int }}%"></span>
+                </span>
+                {{ "%.0f" | format(txn.ai_confidence * 100) }}%
+                {% if txn.classification_confirmed %}
+                    <span class="badge badge-sm badge-success">Confirmed</span>
+                {% endif %}
+                {% else %}
+                <span class="text-muted">—</span>
+                {% endif %}
+            </td>
+            <td>
+                <button class="btn btn-sm btn-outline" onclick="toggleClassify({{ txn.id }})">
+                    {% if txn.account_id %}Edit{% else %}Classify{% endif %}
+                </button>
+            </td>
+        </tr>
+        <tr id="classify-{{ txn.id }}" class="classify-row" style="display:none">
+            <td colspan="7">
+                <form method="post" action="/transactions/{{ org.id }}/confirm/{{ txn.id }}" class="classify-form">
+                    <select name="account_id" required class="form-control form-control-sm">
+                        <option value="">Select account…</option>
+                        {% for acct in accounts %}
+                        <option value="{{ acct.id }}" {% if txn.account_id == acct.id %}selected{% endif %}>
+                            {{ acct.code }} — {{ acct.name }} ({{ acct.account_type }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <select name="fund_id" class="form-control form-control-sm">
+                        <option value="">Select fund…</option>
+                        {% for f in funds %}
+                        <option value="{{ f.id }}" {% if txn.fund_id == f.id %}selected{% endif %}>
+                            {{ f.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-sm btn-primary">Confirm</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+{% else %}
+<div class="empty-state">
+    <h2>No transactions yet</h2>
+    <p>Upload a bank statement CSV to get started.</p>
+    <a href="/transactions/{{ org.id }}/upload" class="btn btn-primary">Upload CSV</a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleClassify(id) {
+    var row = document.getElementById('classify-' + id);
+    row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+}
+</script>
+{% endblock %}

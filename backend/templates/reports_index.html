@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Reports — {{ org.name }}{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Financial Reports</h1>
+</div>
+
+<div class="card-grid">
+    <a href="/reports/{{ org.id }}/income-expense" class="card card-link">
+        <div class="card-body">
+            <h3>Income & Expense</h3>
+            <p class="text-muted">Revenue vs. expenses for a given period. The core P&L statement for your nonprofit.</p>
+        </div>
+    </a>
+    <a href="/reports/{{ org.id }}/balance-sheet" class="card card-link">
+        <div class="card-body">
+            <h3>Balance Sheet</h3>
+            <p class="text-muted">Assets, liabilities, and net assets as of a given date.</p>
+        </div>
+    </a>
+    <a href="/reports/{{ org.id }}/fund-summary" class="card card-link">
+        <div class="card-body">
+            <h3>Fund Summary</h3>
+            <p class="text-muted">Income and expenses broken down by fund (restricted vs. unrestricted).</p>
+        </div>
+    </a>
+</div>
+{% endblock %}

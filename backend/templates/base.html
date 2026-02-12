@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Nonprofit Accounting{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="nav-brand">Nonprofit Accounting</a>
+        {% if org is defined and org %}
+        <div class="nav-links">
+            <a href="/dashboard/{{ org.id }}">Dashboard</a>
+            <a href="/transactions/{{ org.id }}">Transactions</a>
+            <a href="/transactions/{{ org.id }}/upload">Upload</a>
+            <a href="/reports/{{ org.id }}">Reports</a>
+        </div>
+        {% endif %}
+    </nav>
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

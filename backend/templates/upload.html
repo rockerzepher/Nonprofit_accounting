@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Upload Bank Statement — {{ org.name }}{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Upload Bank Statement</h1>
+    <p class="text-muted">Upload a CSV file from your bank. We'll parse and auto-classify the transactions.</p>
+</div>
+
+<form method="post" action="/transactions/{{ org.id }}/upload" enctype="multipart/form-data" class="form card">
+    <div class="card-body">
+        <div class="form-group">
+            <label for="file">Bank Statement CSV</label>
+            <input type="file" id="file" name="file" accept=".csv" required class="form-control">
+            <small class="text-muted">Accepted format: CSV with columns for Date, Description, and Amount (or Debit/Credit).</small>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">Upload & Classify</button>
+    </div>
+</form>
+
+<div class="card">
+    <div class="card-body">
+        <h3>Supported CSV Formats</h3>
+        <p>Most bank CSV exports work automatically. We look for columns like:</p>
+        <ul>
+            <li><strong>Date:</strong> Date, Posted, Transaction Date, Posting Date</li>
+            <li><strong>Description:</strong> Description, Memo, Details, Narrative, Payee</li>
+            <li><strong>Amount:</strong> Amount, or separate Debit/Credit columns</li>
+            <li><strong>Reference:</strong> Reference, Check Number (optional)</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
