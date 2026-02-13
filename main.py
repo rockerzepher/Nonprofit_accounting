@@ -2,8 +2,10 @@
 
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from backend._paths import STATIC_DIR
 from backend.database import init_db
@@ -20,6 +22,30 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Nonprofit Accounting", version="0.1.0", lifespan=lifespan)
+
+
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    """Handle 405 Method Not Allowed by redirecting to home."""
+    if exc.status_code == 405:
+        return RedirectResponse(url="/", status_code=303)
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+    )
+
+
+# Debug endpoint — shows what Vercel is actually sending
+@app.get("/debug")
+def debug_request(request: Request):
+    return {
+        "path": request.url.path,
+        "method": request.method,
+        "base_url": str(request.base_url),
+        "url": str(request.url),
+        "headers": dict(request.headers),
+    }
+
 
 # Static files
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")

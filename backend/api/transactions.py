@@ -80,18 +80,20 @@ async def upload_file(org_id: int, request: Request,
     )
 
 
-@router.post("/{org_id}/classify-all")
+@router.api_route("/{org_id}/classify-all", methods=["GET", "POST"])
 def classify_all(org_id: int, db: Session = Depends(get_db)):
     """Run classifier on all unclassified transactions."""
     classify_transactions(db, org_id)
     return RedirectResponse(url=f"/transactions/{org_id}", status_code=303)
 
 
-@router.post("/{org_id}/confirm/{txn_id}")
+@router.api_route("/{org_id}/confirm/{txn_id}", methods=["GET", "POST"])
 def confirm_txn(org_id: int, txn_id: int,
-                account_id: int = Form(...),
+                account_id: int = Form(None),
                 fund_id: int = Form(None),
                 db: Session = Depends(get_db)):
     """Confirm or correct a transaction's classification."""
+    if account_id is None:
+        return RedirectResponse(url=f"/transactions/{org_id}", status_code=303)
     confirm_classification(db, txn_id, account_id, fund_id)
     return RedirectResponse(url=f"/transactions/{org_id}", status_code=303)
