@@ -76,7 +76,7 @@ async def upload_file(org_id: int, request: Request,
 
     return RedirectResponse(
         url=f"/transactions/{org_id}?uploaded={len(txns)}",
-        status_code=302,
+        status_code=303,
     )
 
 
@@ -84,7 +84,7 @@ async def upload_file(org_id: int, request: Request,
 def classify_all(org_id: int, db: Session = Depends(get_db)):
     """Run classifier on all unclassified transactions."""
     classify_transactions(db, org_id)
-    return RedirectResponse(url=f"/transactions/{org_id}", status_code=302)
+    return RedirectResponse(url=f"/transactions/{org_id}", status_code=303)
 
 
 @router.post("/{org_id}/confirm/{txn_id}")
@@ -94,4 +94,4 @@ def confirm_txn(org_id: int, txn_id: int,
                 db: Session = Depends(get_db)):
     """Confirm or correct a transaction's classification."""
     confirm_classification(db, txn_id, account_id, fund_id)
-    return RedirectResponse(url=f"/transactions/{org_id}", status_code=302)
+    return RedirectResponse(url=f"/transactions/{org_id}", status_code=303)

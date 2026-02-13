@@ -32,4 +32,4 @@ def onboarding_submit(
     org = create_organization(db, name=name, org_type=org_type,
                               description=description,
                               fiscal_year_start=fiscal_year_start)
-    return RedirectResponse(url=f"/dashboard/{org.id}", status_code=302)
+    return RedirectResponse(url=f"/dashboard/{org.id}", status_code=303)
