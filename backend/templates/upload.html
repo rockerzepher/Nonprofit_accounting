@@ -3,15 +3,15 @@
 {% block content %}
 <div class="page-header">
     <h1>Upload Bank Statement</h1>
-    <p class="text-muted">Upload a CSV file from your bank. We'll parse and auto-classify the transactions.</p>
+    <p class="text-muted">Upload a CSV or PDF bank statement. We'll parse and auto-classify the transactions.</p>
 </div>
 
 <form method="post" action="/transactions/{{ org.id }}/upload" enctype="multipart/form-data" class="form card">
     <div class="card-body">
         <div class="form-group">
-            <label for="file">Bank Statement CSV</label>
-            <input type="file" id="file" name="file" accept=".csv" required class="form-control">
-            <small class="text-muted">Accepted format: CSV with columns for Date, Description, and Amount (or Debit/Credit).</small>
+            <label for="file">Bank Statement (CSV or PDF)</label>
+            <input type="file" id="file" name="file" accept=".csv,.pdf" required class="form-control">
+            <small class="text-muted">Accepted formats: CSV or PDF bank statements.</small>
         </div>
 
         <button type="submit" class="btn btn-primary btn-block">Upload & Classify</button>
@@ -20,13 +20,23 @@
 
 <div class="card">
     <div class="card-body">
-        <h3>Supported CSV Formats</h3>
+        <h3>Supported Formats</h3>
+
+        <h4>CSV Files</h4>
         <p>Most bank CSV exports work automatically. We look for columns like:</p>
         <ul>
             <li><strong>Date:</strong> Date, Posted, Transaction Date, Posting Date</li>
             <li><strong>Description:</strong> Description, Memo, Details, Narrative, Payee</li>
             <li><strong>Amount:</strong> Amount, or separate Debit/Credit columns</li>
             <li><strong>Reference:</strong> Reference, Check Number (optional)</li>
+        </ul>
+
+        <h4>PDF Files</h4>
+        <p>We extract transactions from PDF bank statements by finding lines with dates and amounts. Works best with:</p>
+        <ul>
+            <li>Text-based PDFs (not scanned images)</li>
+            <li>Standard bank statement layouts with date, description, and amount columns</li>
+            <li>Statements from most major banks (Chase, Bank of America, Wells Fargo, etc.)</li>
         </ul>
     </div>
 </div>

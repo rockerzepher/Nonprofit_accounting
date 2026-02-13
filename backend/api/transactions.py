@@ -10,6 +10,7 @@ from backend.database import get_db
 from backend.models.accounting import Transaction, Account, Fund
 from backend.models.organization import Organization
 from backend.services.csv_parser import parse_csv
+from backend.services.pdf_parser import parse_pdf
 from backend.services.classifier import classify_transactions, confirm_classification
 
 router = APIRouter()
@@ -57,12 +58,17 @@ def upload_form(org_id: int, request: Request, db: Session = Depends(get_db)):
 
 
 @router.post("/{org_id}/upload")
-async def upload_csv(org_id: int, request: Request,
-                     file: UploadFile = File(...),
-                     db: Session = Depends(get_db)):
-    """Upload and parse a bank statement CSV."""
+async def upload_file(org_id: int, request: Request,
+                      file: UploadFile = File(...),
+                      db: Session = Depends(get_db)):
+    """Upload and parse a bank statement (CSV or PDF)."""
     contents = await file.read()
-    txns = parse_csv(contents, org_id, db)
+    filename = (file.filename or "").lower()
+
+    if filename.endswith(".pdf") or file.content_type == "application/pdf":
+        txns = parse_pdf(contents, org_id, db)
+    else:
+        txns = parse_csv(contents, org_id, db)
 
     # Auto-classify the imported transactions
     txn_ids = [t.id for t in txns]
