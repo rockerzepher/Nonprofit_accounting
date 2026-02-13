@@ -17,6 +17,31 @@
 </div>
 {% endif %}
 
+{% if upload_count is defined %}
+    {% if upload_count > 0 %}
+    <div class="alert alert-success">
+        Successfully imported {{ upload_count }} transactions and auto-classified them.
+    </div>
+    {% else %}
+    <div class="alert" style="background:#fff3cd;border:1px solid #ffc107;padding:1rem;border-radius:8px;margin-bottom:1rem;">
+        <strong>No transactions found in the uploaded file.</strong>
+        <p style="margin:0.5rem 0 0;">The parser could not detect transaction rows. This can happen if:</p>
+        <ul style="margin:0.5rem 0;">
+            <li>The PDF is a scanned image (not text-based)</li>
+            <li>The bank uses an unusual format we don't recognize yet</li>
+            <li>The file is password-protected or corrupted</li>
+        </ul>
+        {% if upload_debug_text %}
+        <details style="margin-top:0.5rem;">
+            <summary style="cursor:pointer;font-weight:600;">Show extracted text (for debugging)</summary>
+            <pre style="background:#f8f9fa;padding:0.75rem;border-radius:4px;max-height:300px;overflow:auto;font-size:0.8rem;white-space:pre-wrap;margin-top:0.5rem;">{{ upload_debug_text }}</pre>
+        </details>
+        {% endif %}
+        <p style="margin:0.5rem 0 0;"><strong>Tip:</strong> Try downloading your statement as CSV from your bank's website — CSV files are more reliably parsed.</p>
+    </div>
+    {% endif %}
+{% endif %}
+
 <div class="filter-bar">
     <a href="/transactions/{{ org.id }}?filter=all" class="btn btn-sm {% if current_filter == 'all' %}btn-primary{% else %}btn-outline{% endif %}">All ({{ transactions | length }})</a>
     <a href="/transactions/{{ org.id }}?filter=unclassified" class="btn btn-sm {% if current_filter == 'unclassified' %}btn-primary{% else %}btn-outline{% endif %}">Unclassified</a>

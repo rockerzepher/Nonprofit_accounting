@@ -10,7 +10,7 @@ from backend.database import get_db
 from backend.models.accounting import Transaction, Account, Fund
 from backend.models.organization import Organization
 from backend.services.csv_parser import parse_csv
-from backend.services.pdf_parser import parse_pdf
+from backend.services.pdf_parser import parse_pdf, extract_pdf_debug_text
 from backend.services.classifier import classify_transactions, confirm_classification
 
 router = APIRouter()
@@ -57,27 +57,54 @@ def upload_form(org_id: int, request: Request, db: Session = Depends(get_db)):
     })
 
 
-@router.post("/{org_id}/upload")
+@router.post("/{org_id}/upload", response_class=HTMLResponse)
 async def upload_file(org_id: int, request: Request,
                       file: UploadFile = File(...),
                       db: Session = Depends(get_db)):
-    """Upload and parse a bank statement (CSV or PDF)."""
+    """Upload and parse a bank statement (CSV or PDF).
+
+    Renders the transaction list directly instead of redirecting,
+    so data is visible even on serverless platforms with ephemeral storage.
+    """
     contents = await file.read()
     filename = (file.filename or "").lower()
+    is_pdf = filename.endswith(".pdf") or file.content_type == "application/pdf"
+    debug_text = ""
 
-    if filename.endswith(".pdf") or file.content_type == "application/pdf":
+    if is_pdf:
         txns = parse_pdf(contents, org_id, db)
+        if not txns:
+            # Show first 2000 chars of extracted text so user can diagnose
+            raw = extract_pdf_debug_text(contents)
+            debug_text = raw[:2000] if raw else "(No text could be extracted — this may be a scanned/image PDF)"
     else:
         txns = parse_csv(contents, org_id, db)
 
     # Auto-classify the imported transactions
     txn_ids = [t.id for t in txns]
-    classify_transactions(db, org_id, txn_ids)
+    if txn_ids:
+        classify_transactions(db, org_id, txn_ids)
 
-    return RedirectResponse(
-        url=f"/transactions/{org_id}?uploaded={len(txns)}",
-        status_code=303,
-    )
+    # Re-query all transactions for this org
+    org = db.get(Organization, org_id)
+    all_txns = db.query(Transaction).filter(
+        Transaction.organization_id == org_id
+    ).order_by(Transaction.date.desc()).all()
+    accounts = db.query(Account).filter(
+        Account.organization_id == org_id).order_by(Account.code).all()
+    funds = db.query(Fund).filter(
+        Fund.organization_id == org_id).all()
+
+    return templates.TemplateResponse("transactions.html", {
+        "request": request,
+        "org": org,
+        "transactions": all_txns,
+        "accounts": accounts,
+        "funds": funds,
+        "current_filter": "all",
+        "upload_count": len(txns),
+        "upload_debug_text": debug_text,
+    })
 
 
 @router.api_route("/{org_id}/classify-all", methods=["GET", "POST"])
