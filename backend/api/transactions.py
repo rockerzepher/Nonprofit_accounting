@@ -52,6 +52,8 @@ def list_transactions(org_id: int, request: Request,
 def upload_form(org_id: int, request: Request, db: Session = Depends(get_db)):
     """Show CSV upload form."""
     org = db.get(Organization, org_id)
+    if not org:
+        return RedirectResponse(url="/", status_code=302)
     return templates.TemplateResponse("upload.html", {
         "request": request, "org": org,
     })
