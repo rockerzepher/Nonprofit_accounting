@@ -66,27 +66,41 @@ async def upload_file(org_id: int, request: Request,
     Renders the transaction list directly instead of redirecting,
     so data is visible even on serverless platforms with ephemeral storage.
     """
+    org = db.get(Organization, org_id)
+    if not org:
+        return templates.TemplateResponse("upload.html", {
+            "request": request,
+            "org": type("Org", (), {"id": org_id, "name": "Unknown"})(),
+            "upload_error": f"Organization {org_id} not found. On Vercel, data is lost between requests. Please start from the home page.",
+        })
+
     contents = await file.read()
     filename = (file.filename or "").lower()
     is_pdf = filename.endswith(".pdf") or file.content_type == "application/pdf"
     debug_text = ""
+    upload_error = ""
 
-    if is_pdf:
-        txns = parse_pdf(contents, org_id, db)
-        if not txns:
-            # Show first 2000 chars of extracted text so user can diagnose
-            raw = extract_pdf_debug_text(contents)
-            debug_text = raw[:2000] if raw else "(No text could be extracted — this may be a scanned/image PDF)"
-    else:
-        txns = parse_csv(contents, org_id, db)
+    try:
+        if is_pdf:
+            txns = parse_pdf(contents, org_id, db)
+            if not txns:
+                raw = extract_pdf_debug_text(contents)
+                debug_text = raw[:2000] if raw else "(No text could be extracted — this may be a scanned/image PDF)"
+        else:
+            txns = parse_csv(contents, org_id, db)
+    except Exception as e:
+        txns = []
+        upload_error = f"Error parsing file: {e}"
 
     # Auto-classify the imported transactions
     txn_ids = [t.id for t in txns]
     if txn_ids:
-        classify_transactions(db, org_id, txn_ids)
+        try:
+            classify_transactions(db, org_id, txn_ids)
+        except Exception:
+            pass  # classification failure shouldn't block showing results
 
     # Re-query all transactions for this org
-    org = db.get(Organization, org_id)
     all_txns = db.query(Transaction).filter(
         Transaction.organization_id == org_id
     ).order_by(Transaction.date.desc()).all()
@@ -104,6 +118,7 @@ async def upload_file(org_id: int, request: Request,
         "current_filter": "all",
         "upload_count": len(txns),
         "upload_debug_text": debug_text,
+        "upload_error": upload_error,
     })
 
 

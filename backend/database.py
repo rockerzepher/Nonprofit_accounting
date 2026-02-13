@@ -36,5 +36,30 @@ def get_db():
 
 
 def init_db():
-    """Create all tables."""
+    """Create all tables and seed a demo org on Vercel (ephemeral DB)."""
     Base.metadata.create_all(bind=engine)
+    _seed_vercel_demo()
+
+
+def _seed_vercel_demo():
+    """On Vercel, auto-create a demo org so the app is usable without onboarding.
+
+    Each cold start gets a fresh SQLite at /tmp, so we need to re-seed.
+    """
+    if not os.environ.get("VERCEL"):
+        return
+
+    from backend.models.organization import Organization
+    db = SessionLocal()
+    try:
+        existing = db.query(Organization).first()
+        if not existing:
+            from backend.services.onboarding import create_organization
+            create_organization(
+                db, name="My Organization",
+                org_type="general_nonprofit",
+                description="Auto-created for Vercel deployment",
+                fiscal_year_start=1,
+            )
+    finally:
+        db.close()

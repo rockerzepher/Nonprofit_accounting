@@ -11,6 +11,12 @@
     </div>
 </div>
 
+{% if upload_error is defined and upload_error %}
+<div class="alert" style="background:#f8d7da;border:1px solid #f5c6cb;padding:1rem;border-radius:8px;margin-bottom:1rem;color:#721c24;">
+    <strong>Upload Error:</strong> {{ upload_error }}
+</div>
+{% endif %}
+
 {% if request.query_params.get('uploaded') %}
 <div class="alert alert-success">
     Successfully imported {{ request.query_params.get('uploaded') }} transactions and auto-classified them.
