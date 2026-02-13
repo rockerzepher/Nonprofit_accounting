@@ -1,7 +1,11 @@
-"""Vercel serverless entry point — exposes the FastAPI app as a handler."""
+"""Vercel serverless entry point — exposes the FastAPI app."""
 
-from main import app
+import sys
+import os
 
-# Vercel's Python runtime looks for `app` or `handler` at module level.
-# FastAPI's ASGI interface is compatible with Vercel's Python runtime.
-handler = app
+# Ensure the project root is on sys.path so 'backend' package resolves
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from main import app  # noqa: E402
+
+# Vercel's Python runtime looks for `app` at module level.
