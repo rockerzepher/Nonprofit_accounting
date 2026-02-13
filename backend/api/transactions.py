@@ -90,6 +90,13 @@ async def upload_file(org_id: int, request: Request,
                 debug_text = raw[:2000] if raw else "(No text could be extracted — this may be a scanned/image PDF)"
         else:
             txns = parse_csv(contents, org_id, db)
+            if not txns:
+                # Show first few lines of the CSV for debugging
+                try:
+                    csv_text = contents.decode("utf-8-sig")
+                except UnicodeDecodeError:
+                    csv_text = contents.decode("latin-1")
+                debug_text = "\n".join(csv_text.split("\n")[:10])
     except Exception as e:
         txns = []
         upload_error = f"Error parsing file: {e}"
